@@ -56,15 +56,15 @@ df <- leer_incore(edicion = 2025)
 
 head(df)
 #> # A tibble: 6 × 11
-#>   edicion pilar    indicador unidad fuente nota  region etiqueta valor
-#>     <int> <chr>    <chr>     <chr>  <chr>  <chr> <chr>  <chr>    <dbl>
-#> 1    2025 Índice … General   Punta… IPE    <NA>  Amazo… AMZ       4.31
-#> 2    2025 Índice … General   Punta… IPE    <NA>  Áncash ÁNC       5.40
-#> 3    2025 Índice … General   Punta… IPE    <NA>  Apurí… APC       5.10
-#> 4    2025 Índice … General   Punta… IPE    <NA>  Arequ… AQP       6.91
-#> 5    2025 Índice … General   Punta… IPE    <NA>  Ayacu… AYA       4.85
-#> 6    2025 Índice … General   Punta… IPE    <NA>  Cajam… CJM       4.38
-#> # ℹ 2 more variables: posicion <int>, anio <int>
+#>   edicion pilar     indicador unidad fuente nota  region etiqueta valor posicion
+#>     <int> <chr>     <chr>     <chr>  <chr>  <chr> <chr>  <chr>    <dbl>    <int>
+#> 1    2025 Índice d… General   Punta… IPE    <NA>  Amazo… AMZ       4.31       22
+#> 2    2025 Índice d… General   Punta… IPE    <NA>  Áncash ÁNC       5.40       10
+#> 3    2025 Índice d… General   Punta… IPE    <NA>  Apurí… APC       5.10       12
+#> 4    2025 Índice d… General   Punta… IPE    <NA>  Arequ… AQP       6.91        3
+#> 5    2025 Índice d… General   Punta… IPE    <NA>  Ayacu… AYA       4.85       17
+#> 6    2025 Índice d… General   Punta… IPE    <NA>  Cajam… CJM       4.38       20
+#> # ℹ 1 more variable: anio <int>
 ```
 
 Ejemplo de visualización
