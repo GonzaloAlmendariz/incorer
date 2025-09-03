@@ -1,0 +1,84 @@
+Package: incorer
+Type: Package
+Title: Herramientas para analizar el Índice de Competitividad Regional (INCORE)
+Version: 0.1.0
+Authors@R: c(
+    person(
+      "Gonzalo", "Almendariz",
+      email = "gonzaloalmendariz@gmail.com",
+      role = c("aut", "cre"),
+      comment = c(ORCID = "0000-0000-0000-0000")
+    )
+  )
+Description: El paquete 'incorer' facilita la importación, transformación, 
+    exploración y visualización de los datos del Índice de Competitividad Regional (INCORE), 
+    elaborado por el Instituto Peruano de Economía (IPE). Permite descargar los datos 
+    abiertos directamente desde la web, generar rankings por año, pilar e indicador, 
+    construir tablas comparativas y reportes automatizados, así como visualizar mapas, 
+    gráficos de líneas, gráficos de radar y otros. Está diseñado para un público hispanohablante, 
+    con funciones intuitivas y catálogos de referencia para simplificar la selección de variables.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    dplyr,
+    forcats,
+    ggplot2,
+    gt,
+    janitor,
+    purrr,
+    readxl,
+    sf,
+    stringr,
+    tidyr, 
+    geodata,
+    GGally,
+    rlang
+RoxygenNote: 7.3.2
+Depends: R (>= 4.2.0)
+Suggests:
+    knitr,
+    rmarkdown,
+    testthat (>= 3.0.0)
+Config/testthat/edition: 3
+Collate: 
+    'catalogos.R'
+    'general_barras.R'
+    'general_dispersion.R'
+    'general_distribucion.R'
+    'general_heatmap.R'
+    'general_helpers.R'
+    'general_largo.R'
+    'general_mapa.R'
+    'general_media.R'
+    'general_radar.R'
+    'general_tabla.R'
+    'importar.R'
+    'ind_tabla.R'
+    'indc_barras.R'
+    'indc_dispersion.R'
+    'indc_distribucion.R'
+    'indc_heatmap.R'
+    'indc_helpers.R'
+    'indc_largo.R'
+    'indc_mapa.R'
+    'indc_media.R'
+    'indc_radar.R'
+    'indc_tabla.R'
+    'leer_total.R'
+    'mapa_peru.R'
+    'multivalor_ridgeline.R'
+    'traducir_codigo.R'
+    'valor_dispersion.R'
+    'valor_distribucion.R'
+    'valor_helpers.R'
+    'valor_largo.R'
+    'valor_barras.R'
+    'valor_mapa.R'
+    'valor_tabla.R'
+    'bivalor_correlaciones.R'
+    'bivalor_helpers.R'
+    'bivalor_dispersion.R'
+    'bivalor_largo.R'
+    'region_grupo.R'
+    'zzz.R'

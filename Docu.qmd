@@ -1,0 +1,572 @@
+---
+title: "INCORER"
+author: "Gonzalo Almendariz Villanueva"
+format: html
+toc: true
+execute: 
+  warning: false
+fig-width: 15
+fig-height: 8
+---
+
+# Introducción al paquete INCORE
+
+El paquete **INCORE** ha sido desarrollado para explorar, analizar y visualizar los resultados del **Índice de Competitividad Regional (INCORE)** de manera flexible, reproducible y amigable para la investigación y la comunicación de resultados.
+
+En esencia, el paquete organiza toda la información del INCORE, ediciones, pilares, indicadores, regiones y unidades, en funciones que permiten:
+
+1.  **Importar y estructurar datos**
+    -   `leer_incore()`: lee la base central del índice para una edición específica.\
+    -   `leer_total()`: carga la base completa con todas las ediciones y valores originales.\
+        Estas funciones devuelven los datos en formato *tibble*, listos para ser procesados en R.
+2.  **Navegar catálogos**
+    -   Funciones como `catalogo_regiones()`, `catalogo_pilar()`, `catalogo_indicador()` y `catalogo_unidad()` devuelven los diccionarios oficiales de referencia, permitiendo traducir entre nombres y códigos.
+3.  **Explorar resultados generales**
+    -   La familia `general_` genera gráficos y tablas del índice en su dimensión más agregada: el **puntaje general por región** o el **general de cada pilar**.\
+        Ejemplos: `general_tabla()`, `general_barras()`, `general_mapa()`.
+4.  **Analizar indicadores específicos (puntajes)**
+    -   La familia `indc_` trabaja con los indicadores estandarizados a escala 0–10.\
+        Incluye funciones para dispersión (`indc_dispersion()`), distribución (`indc_distribucion()`), evolución temporal (`indc_largo()`), entre otras.
+5.  **Analizar valores originales**
+    -   La familia `valor_` conserva las unidades originales de cada indicador (porcentaje, número, soles, etc.).\
+        Esto permite ver los valores “crudos” de los indicadores sin estandarización, útil para interpretación sectorial y comunicación técnica.\
+        Ejemplos: `valor_dispersion()`, `valor_distribucion()`, `multivalor_ridgeline()`.
+6.  **Comparaciones bivariadas**
+    -   La familia `bivalor_` explora relaciones entre indicadores, mostrando correlaciones, comparaciones y dispersión en pares de variables.
+
+En conjunto, el paquete busca **integrar datos, catálogos y visualizaciones** en una misma interfaz, de modo que los usuarios puedan pasar sin fricción desde una tabla exploratoria hasta un gráfico final para informes.
+
+La estructura modular (general\_, indc\_, valor\_, bivalor\_) facilita entender qué tipo de dato se está utilizando (puntajes normalizados vs valores originales) y qué nivel de análisis corresponde (agregado vs detallado).
+
+El paquete **INCORE** permite a investigadores, analistas de política y comunicadores disponer de un ecosistema completo para trabajar con el índice, asegurando rigor en los filtros y claridad en las visualizaciones.
+
+```{r}
+library(incorer)
+library(dplyr)
+```
+
+# Catálogos
+
+Los catálogos son funciones auxiliares que devuelven diccionarios con las entidades clave del INCORE: regiones, pilares, indicadores y unidades.\
+Sirven para validar insumos, traducir entre códigos y nombres, y facilitar filtros consistentes en los gráficos y tablas.
+
+## catalogo_regiones
+
+Devuelve la lista oficial de las 25 regiones más la entrada "Perú".
+
+```{r}
+head(catalogo_region())
+```
+
+## catalogo_pilar
+
+Devuelve los seis pilares que conforman el INCORE:
+
+-   Entorno Económico
+
+-   Laboral
+
+-   Infraestructura
+
+-   Salud
+
+-   Educación
+
+-   Instituciones
+
+```{r}
+catalogo_pilar()
+```
+
+## catalogo_indicador
+
+Lista todos los indicadores que forman parte de cada pilar, con su código (p.ej. LAB1, SAL4).
+
+```{r}
+head(catalogo_indicador())
+```
+
+# Funciones `general_`
+
+La familia de funciones `general_` trabaja con el **nivel más agregado del INCORE**: el **puntaje general por región**, ya sea para el índice total o para el *general* de un pilar.
+
+Estas funciones son útiles para tener una **visión panorámica de la competitividad regional**, explorando tanto comparaciones en una sola edición como tendencias a lo largo del tiempo.
+
+En concreto, permiten:
+
+-   **Tablas** (`general_tabla`): ver los puntajes generales en formato tabular, con opción a mostrar en estilo `gt`.\
+-   **Gráficos de barras** (`general_barras`): comparar regiones en un año específico.\
+-   **Dispersión entre pilares** (`general_dispersion_pilares`): analizar cómo se relacionan los puntajes generales de distintos pilares.\
+-   **Distribución** (`general_distribucion`): mostrar la variabilidad de los puntajes generales entre regiones, con boxplots o violines.\
+-   **Heatmaps** (`general_heatmap`): seguir la evolución de regiones y ediciones en formato de mapa de calor.\
+-   **Series largas** (`general_largo`): observar la trayectoria de regiones o pilares a lo largo de varias ediciones.\
+-   **Mapas geográficos** (`general_mapa`): representar en el territorio los puntajes generales por región.\
+-   **Comparación con el promedio** (`general_media`): contrastar regiones con el promedio nacional o de un grupo seleccionado.\
+-   **Gráficos radar** (`general_radar`): comparar varias regiones de manera simultánea en forma de radar.
+
+## general_tabla
+
+Genera una tabla con los puntajes generales (total o por pilar).
+
+**Argumentos principales**:\
+- `ediciones`: vector de años (ej. `2018:2025`).\
+- `regiones`: `"ALL"` (default) o vector de regiones/grupos.\
+- `usar_codigos`: si TRUE, permite pasar códigos (ej. `"gr_costa"`).\
+- `gt`: si TRUE, retorna tabla en formato `gt` con estilo mejorado.
+
+```{r}
+general_tabla(ediciones = 2022:2025)
+```
+
+```{r}
+general_tabla(ediciones = 2023:2025, regiones = "gr_sur", gt = T)
+```
+
+## general_barras
+
+Muestra un gráfico de barras con los puntajes generales por región en una edición.
+
+**Argumentos principales**:\
+- `edicion`: año específico (ej. `2024`).\
+- `regiones`: `"ALL"` o vector de regiones.\
+- `paleta`: esquema de colores (`"ipe"`, `"okabe_ito"`, `"viridis"`, etc.). - `usar_codigos`: activar uso de códigos de regiones.
+
+```{r}
+general_barras(edicion = 2018)
+```
+
+```{r}
+general_barras(edicion = 2018, regiones = "gr_costa", paleta = "okabe_ito")
+```
+
+## general_dispersion
+
+Gráfico de dispersión de puntajes generales entre pilares para un conjunto de regiones.
+
+**Argumentos principales**:\
+- `edicion`: año específico.\
+- `regiones`: `"ALL"` o vector de regiones.\
+- `paleta`: paleta de colores para regiones.\
+- `mostrar_promedio`: si TRUE, añade rombo con promedio por pilar.\
+- `promedio_shape`, `promedio_size`, `promedio_color`: estética del promedio.
+
+```{r}
+general_dispersion_pilares(edicion = 2018, 
+                           regiones = "gr_costa", 
+                           paleta = "viridis")
+```
+
+```{r}
+general_dispersion_pilares(edicion = 2018, 
+                           regiones = "gr_selva", 
+                           promedio_shape = 24,
+                           promedio_size = 0.8)
+```
+
+## general_distribucion
+
+Muestra la distribución de puntajes generales entre regiones, por indicador general.
+
+**Argumentos principales**:\
+- `edicion`: año específico.\
+- `modo`: `"general"` (default) o `"pilar"`.\
+- `tipo`: `"boxplot"` o `"violin"`.\
+- `jitter`: si TRUE, añade puntos individuales.\
+- `paleta`: esquema de color por indicador.
+
+```{r}
+general_distribucion(edicion = 2018, paleta = "cividis")
+```
+
+```{r}
+general_distribucion(edicion = 2018, modo = "general", 
+                     tipo = "violin", jitter = T)
+```
+
+## general_heatmap
+
+Genera un mapa de calor con puntajes generales a lo largo de múltiples ediciones.
+
+**Argumentos principales**:\
+- `ediciones`: rango de años.\
+- `regiones`: `"ALL"` o vector de regiones.\
+- `paleta`: esquema de colores (`"viridis"`, `"cividis"`, `"magma"`, etc.). - `anotar`: si TRUE, añade etiquetas numéricas en las celdas.
+
+```{r}
+general_heatmap(ediciones = 2016:2025)
+```
+
+```{r}
+general_heatmap(ediciones = 2016:2025, regiones = c("gr_sierra", "Lima*"),
+                paleta = "magma", anotar = T)
+```
+
+## general_largo
+
+Serie temporal de puntajes generales para regiones o pilares.
+
+**Argumentos principales**:\
+- `ediciones`: rango de años.\
+- `regiones`: `"ALL"` o vector de regiones.\
+- `modo`: `"regiones"` (default) o `"pilares"`.\
+- `mostrar_puntos`: TRUE/FALSE para puntos sobre la línea.
+
+```{r}
+general_largo(ediciones = 2016:2025, 
+              regiones = "gr_costa")
+```
+
+```{r}
+general_largo(ediciones = 2016:2025, modo = "pilares", 
+              regiones = "gr_selva", mostrar_puntos = F)
+```
+
+## general_mapa
+
+## general_mapa
+
+Mapa geográfico de los puntajes generales por región.
+
+**Argumentos principales**:\
+- `edicion`: año específico.\
+- `regiones`: `"ALL"` o vector de regiones a mostrar.\
+- `paleta`: paleta de color (`"ipe"`, `"cividis"`, `"viridis"`, etc.).\
+- `zoom`: si TRUE, ajusta el zoom al subconjunto de regiones.
+
+```{r}
+general_mapa(edicion = 2024)
+```
+
+```{r}
+# general para pilar
+```
+
+```{r}
+general_mapa(edicion = 2025, regiones = "gr_sur", 
+             paleta = "cividis", zoom = T)
+```
+
+## general_media
+
+Compara puntajes generales de regiones con el promedio.
+
+**Argumentos principales**:\
+- `edicion`: año específico.\
+- `pilar`: `NULL` para índice total o código de un pilar.\
+- `regiones`: `"ALL"` o vector de regiones.\
+- `esquema`:\
+- `"binario"`: arriba/abajo del promedio.\
+- `"divergente"`: escala continua respecto al promedio.\
+- `"semaforo"`: bajo / en torno / alto.\
+- `"region"`: colores por región.\
+- `"monocromo"`: un solo color.\
+- `promedio_nacional`: TRUE para usar promedio nacional. FALSE para usar promedio de regiones filtradas.\
+- `mostrar_leyenda`: mostrar/ocultar leyenda.
+
+```{r}
+general_media(edicion = 2024)
+```
+
+```{r}
+general_media(edicion = 2024, regiones = "gr_sierra",
+              esquema = "divergente")
+```
+
+```{r}
+general_media(edicion = 2024, regiones = "gr_selva",
+              esquema = "divergente", pilar = "EDU")
+```
+
+```{r}
+general_media(edicion = 2024, regiones = "gr_selva",
+              esquema = "divergente", pilar = "EDU", 
+              promedio_nacional = T)
+```
+
+## general_radar
+
+Comparación simultánea de varias regiones en gráfico de radar.
+
+**Argumentos principales**:\
+- `edicion`: año específico.\
+- `regiones`: vector de regiones.\
+- `paleta`: esquema de color para regiones.\
+- `usar_codigos`: si TRUE, admite códigos de regiones.
+
+```{r}
+general_radar(edicion = 2025, regiones = c("Moquegua", "Arequipa", "Ica"))
+```
+
+```{r}
+general_radar(edicion = 2025, 
+              regiones = c("Loreto", "Puno", "Apurímac"),
+              paleta = "okabe_ito")
+```
+
+# Funciones indc\_ y valor\_
+
+Las familias `indc_` y `valor_` permiten analizar el **INCORE** a nivel de **indicadores específicos** (`indc_`) o de **valores originales** (`valor_`).\
+Mientras `indc_` trabaja con los **puntajes estandarizados 0–10**, la familia `valor_` utiliza los **valores originales de cada indicador** en su unidad propia (porcentaje, soles, horas, etc.).
+
+## Tablas
+
+### `indc_tabla`
+
+Muestra una tabla con los puntajes de indicadores en una edición.\
+**Argumentos principales**:\
+- `ediciones`: año o rango de años.\
+- `pilar`: código/nombre del pilar (ej. `"SAL"`).\
+- `regiones`: `"ALL"` o vector de regiones/grupos.\
+- `gt`: TRUE para tabla con estilo `gt`.
+
+```{r}
+indc_tabla(ediciones = 2022, regiones = "gr_norte",
+           pilar = "SAL", gt = T)
+```
+
+### `valor_tabla`
+
+Igual a `indc_tabla`, pero muestra los **valores originales** (con sus unidades).
+
+```{r}
+valor_tabla(ediciones = 2022, regiones = "gr_norte",
+           pilar = "SAL", gt = T)
+```
+
+## Barras
+
+### `indc_barras`
+
+Gráfico de barras de un **indicador específico** en puntajes 0–10.\
+**Argumentos**:\
+- `edicion`: año específico.\
+- `indicador`: código/nombre del indicador.\
+- `regiones`: `"ALL"` o subconjunto de regiones.\
+- `paleta`: paleta de colores.
+
+```{r}
+indc_barras(edicion = 2019, indicador = "ECO3")
+```
+
+### `valor_barras`
+
+Equivalente a `indc_barras`, pero usando **valores originales**.
+
+```{r}
+valor_barras(edicion = 2019, indicador = "ECO3")
+```
+
+## Series de tiempo
+
+### `indc_largo`
+
+Serie temporal de puntajes (0–10) para un pilar o indicador.\
+**Argumentos**:\
+- `ediciones`: rango de años.\
+- `pilar`: código/nombre de pilar.\
+- `indicadores`: vector de indicadores (opcional).\
+- `regiones`: regiones o grupos.\
+- `mostrar_puntos`: TRUE/FALSE.
+
+```{r}
+indc_largo(ediciones = 2016:2025, pilar = "LAB",
+           regiones = "gr_selva", mostrar_puntos = F)
+```
+
+### `valor_largo`
+
+Igual a `indc_largo`, pero sobre **valores originales**.
+
+```{r}
+valor_largo(ediciones = 2016:2025, pilar = "LAB",
+           regiones = "gr_selva", mostrar_puntos = F)
+```
+
+```{r}
+valor_largo(ediciones = 2016:2025,pilar = "LAB", 
+            indicadores = "LAB5", regiones = "gr_selva")
+```
+
+## Mapas
+
+### `indc_mapa`
+
+Mapa geográfico de un indicador en puntajes (0–10).\
+**Argumentos**:\
+- `edicion`: año específico.\
+- `indicador`: código/nombre.\
+- `regiones`: `"ALL"` o vector de regiones.\
+- `paleta`: `"viridis"`, `"cividis"`, `"magma"`, etc.\
+- `zoom`: TRUE ajusta zoom al subconjunto.
+
+```{r}
+indc_mapa(edicion = 2025, 
+          indicador = "INS5",
+          regiones = "gr_costa",
+          zoom = T, paleta = "magma")
+```
+
+### `valor_mapa`
+
+Igual a `indc_mapa`, pero usando **valores originales** (con su unidad).
+
+```{r}
+valor_mapa(edicion = 2025, 
+          indicador = "INS5",
+          regiones = "gr_costa",
+          zoom = T, paleta = "blues")
+```
+
+## indc_heatmap
+
+Heatmap para visualizar un indicador a lo largo del tiempo o entre regiones.\
+**Argumentos**:\
+- `ediciones`: rango de años.\
+- `modo`: `"tiempo"` (filas=regiones, columnas=años) o `"regiones"`.\
+- `indicador`: código/nombre del indicador.\
+- `regiones`: subconjunto de regiones.\
+- `paleta`: esquema de colores.\
+- `anotar`: TRUE para mostrar valores en celdas.
+
+```{r}
+indc_heatmap(ediciones = 2016:2025, modo = "tiempo", 
+             indicador = "ECO3", anotar = T, 
+             regiones = "gr_costa", paleta = "cividis")
+```
+
+## indc_radar
+
+Comparación de regiones en un **pilar** usando gráfico radar.\
+**Argumentos**:\
+- `edicion`: año específico.\
+- `pilar`: código/nombre del pilar.\
+- `regiones`: vector de regiones (mínimo 2).\
+- `paleta`: esquema de color.
+
+```{r}
+indc_radar(edicion = 2025, pilar = "ECO",
+           regiones = c("PUN", "AYA", "CUS"))
+```
+
+## indc_dispersion
+
+Dispersión de puntajes de un **pilar** (indicadores vs regiones).\
+**Argumentos**:\
+- `edicion`: año específico.\
+- `pilar`: código/nombre del pilar.\
+- `regiones`: subconjunto de regiones.\
+- `paleta`: `"ipe"`, `"okabe_ito"`, `"viridis"`.\
+- `mostrar_promedio`: añade promedio por indicador.
+
+```{r}
+indc_dispersion(edicion = 2024, pilar = "SAL",
+                regiones = "gr_sierra")
+```
+
+## indc_distribucion
+
+Distribución de puntajes por indicador dentro de un pilar.\
+**Argumentos**:\
+- `edicion`: año específico.\
+- `pilar`: código/nombre del pilar.\
+- `tipo`: `"boxplot"` o `"violin"`.\
+- `jitter`: TRUE para añadir puntos.\
+- `paleta`: esquema de color.
+
+```{r}
+indc_distribucion(edicion = 2025, pilar = "ECO")
+```
+
+## valor_ridgelines
+
+Gráfico de densidad (ridgelines) de los **valores** de un indicador a lo largo del tiempo.\
+**Argumentos**:\
+- `indicador`: código/nombre del indicador.\
+- `ediciones`: rango de años.\
+- `regiones`: subconjunto de regiones.\
+- `paleta`: paleta de colores.\
+- Muestra la **distribución histórica de valores** para cada año.
+
+```{r}
+valor_ridgeline(indicador = "EDU2", ediciones = 2016:2025, 
+                regiones = "gr_sur")
+```
+
+# Funciones bivalor\_
+
+La familia `bivalor_` permite analizar **relaciones entre dos o más indicadores** de manera conjunta.\
+Está diseñada para explorar **correlaciones, dispersiones y series de tiempo comparadas** entre indicadores, ya sea en **puntajes (0–10)** o en **valores originales**, según la fuente de datos cargada.
+
+## bivalor_largo
+
+Muestra la evolución en el tiempo de **dos indicadores** en paralelo (serie temporal comparada).
+
+**Argumentos principales**:\
+- `ediciones`: rango de años (ej. `2016:2025`).\
+- `ind_x`: código del primer indicador.\
+- `ind_y`: código del segundo indicador.\
+- `regiones`: `"ALL"` o vector de regiones (opcional).\
+- `usar_codigos`: TRUE/FALSE para traducir códigos de indicadores/regiones. - `mostrar_puntos`: añadir puntos en la serie.
+
+```{r}
+bivalor_largo(ediciones = 2016:2025, 
+              ind_x = "EDU1", ind_y = "ECO2")
+```
+
+## bivalor_dispersion
+
+Dibuja un scatterplot comparando dos indicadores en un año específico. Cada punto es una región, con sus valores en ind_x y ind_y.
+
+**Argumentos principales:**
+
+-   `edicion`: año específico.
+
+-   `ind_x, ind_y`: indicadores a comparar.
+
+-   `regiones`: subconjunto de regiones (opcional).
+
+-   `modo`: "normal" (default) o "resaltar" para destacar regiones.
+
+-   `highlight_regiones`: vector de regiones a resaltar (ej. "LIM\*" para Lima).
+
+-   `highlight_color`: color para resaltar regiones.
+
+-   `paleta`: esquema de color para el resto de puntos.
+
+```{r}
+bivalor_dispersion(edicion = 2025,
+                   ind_x = "LAB3", ind_y = "EDU1"
+                   )
+```
+
+```{r}
+bivalor_dispersion(edicion = 2025,
+                   ind_x = "LAB3", ind_y = "EDU1",
+                   modo = "resaltar",
+                   highlight_regiones = c("LIM*", "Cusco", 
+                                          "Puno", "Loreto"),
+                   highlight_color = "#1A9850")
+```
+
+## bivalor_correlaciones
+
+Calcula y grafica la matriz de correlaciones entre un conjunto de indicadores para un año. Muestra un mapa de calor (heatmap) con coeficientes de correlación (ej. Pearson o Spearman).
+
+**Argumentos principales:**
+
+`edicion`: año específico.
+
+`indicadores`: vector de indicadores a correlacionar.
+
+`regiones`: subconjunto de regiones (opcional).
+
+`metodo`: "pearson" (default), "spearman", "kendall". •
+
+`anotar`: TRUE para mostrar coeficientes en cada celda.
+
+`paleta`: paleta de colores para la escala.
+
+```{r}
+bivalor_correlaciones(edicion = 2025, 
+                      indicadores = c("ECO2", "EDU3", "LAB4"))
+```
