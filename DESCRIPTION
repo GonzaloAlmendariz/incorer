@@ -82,3 +82,5 @@ Collate:
     'bivalor_largo.R'
     'region_grupo.R'
     'zzz.R'
+URL: https://github.com/GonzaloAlmendariz/incorer
+BugReports: https://github.com/GonzaloAlmendariz/incorer/issues
