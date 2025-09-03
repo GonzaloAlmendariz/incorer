@@ -94,7 +94,7 @@ library(dplyr)
 
 # Lectura de los datos
 
-```{r, }
+```{r}
 data = leer_incore()
 
 data |>
