@@ -1,3 +1,4 @@
+#' @importFrom utils modifyList
 .onLoad <- function(libname, pkgname) {
   default_groups <- list(
     gr_costa = c("Tumbes","Piura","Lambayeque","La Libertad","Áncash",

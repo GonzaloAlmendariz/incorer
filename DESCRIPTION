@@ -4,10 +4,9 @@ Title: Herramientas para analizar el Índice de Competitividad Regional (INCORE)
 Version: 0.1.0
 Authors@R: c(
     person(
-      "Gonzalo", "Almendariz",
+      "Gonzalo", "Almendariz Villanueva",
       email = "gonzaloalmendariz@gmail.com",
-      role = c("aut", "cre"),
-      comment = c(ORCID = "0000-0000-0000-0000")
+      role = c("aut", "cre")
     )
   )
 Description: El paquete 'incorer' facilita la importación, transformación, 
@@ -21,6 +20,7 @@ License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
 Imports: 
+    utils,
     dplyr,
     forcats,
     ggplot2,
